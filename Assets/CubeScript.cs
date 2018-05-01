@@ -22,7 +22,7 @@ public class CubeScript : MonoBehaviour
 	void Update()
 	{
 		
-		var = arduinoConnector.ReadFromArduino(1); //read from Arduino
+		var = arduinoConnector.ReadByteFromArduino(1); //read from Arduino
 		
 		if (var == 1) {	 //If 1 is being sent from Arduino - button is being pressed!
 			Debug.Log("Button Pressed!");
@@ -42,13 +42,13 @@ public class CubeScript : MonoBehaviour
        if (!yellow){
        		Debug.Log("Turn on LED!");
        		rend.material.SetColor("_Color",Color.yellow); //turn the cube YELLOW
-       		arduinoConnector.WriteToArduino(255); //send 255 to Arduino
+       		arduinoConnector.WriteByteToArduino(255); //send 255 to Arduino
        		yellow = true;
 		}
 		else {
 			Debug.Log("Turn LED off!");
        		rend.material.SetColor("_Color",Color.blue); //turn the cube YELLOW
-       		arduinoConnector.WriteToArduino(255); //send 255 to Arduino
+       		arduinoConnector.WriteByteToArduino(255); //send 255 to Arduino
        		yellow = false;
 		}
     }	

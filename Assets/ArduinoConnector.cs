@@ -1,6 +1,9 @@
 ﻿/* Modded version of ArduinoConnector by Alan Zucconi
  * http://www.alanzucconi.com/?p=2979
- * changed data read and written to be a byte. 
+ * changed data read and written to be a byte.
+ * 
+ * Further modded by Eddie Melcer
+ * http://www.edwardmelcer.net
  */
 using UnityEngine;
 using System;
@@ -34,7 +37,7 @@ public class ArduinoConnector : MonoBehaviour {
     }
     
 
-    public void WriteToArduino(byte message)
+    public void WriteByteToArduino(byte message)
      {
        //  Debug.Log(message);
        	 b[0] = message; //stick byte data into byte array b
@@ -42,12 +45,11 @@ public class ArduinoConnector : MonoBehaviour {
          stream.BaseStream.Flush(); 
     }
 
-    public int ReadFromArduino(int timeout)
+    public int ReadByteFromArduino(int timeout)
     {
         stream.ReadTimeout = timeout;
         try
         {
-			//Debug.Log("reading...");
             return stream.ReadByte(); //return whatever is read here
         }
         catch (TimeoutException)
@@ -55,41 +57,57 @@ public class ArduinoConnector : MonoBehaviour {
             return 0;
         }
     }
-    
-    public IEnumerator AsynchronousReadFromArduino(Action<string> callback, Action fail = null, float timeout = float.PositiveInfinity)
+
+    public void WriteByteToArduinoAsync(byte message)
+    {
+        StartCoroutine(AsynchronousWriteByteToArduino(message));
+    }
+
+    private IEnumerator AsynchronousWriteByteToArduino(byte message)
+    {
+        b[0] = message; //stick byte data into byte array b
+        stream.Write(b, 0, 1); //sends b with some other info.
+        stream.BaseStream.FlushAsync();
+
+        yield return null;
+    }
+
+    public void ReadByteFromArduinoAsync(Action<byte> callback, Action fail = null, float timeoutMS = float.PositiveInfinity)
+    {
+        StartCoroutine(AsynchronousReadByteFromArduino(callback, fail, timeoutMS));
+    }
+
+    private IEnumerator AsynchronousReadByteFromArduino(Action<byte> callback, Action fail = null, float timeoutMS = float.PositiveInfinity)
     {
         DateTime initialTime = DateTime.Now;
         DateTime nowTime;
         TimeSpan diff = default(TimeSpan);
 
-        string dataString = null;
+        byte data = byte.MinValue;
+        bool read = false;
 
         do
         {
             // A single read attempt
             try
             {
-                dataString = stream.ReadLine();
+                data = Convert.ToByte(stream.ReadByte());
+                callback(data);
+                read = true;
             }
             catch (TimeoutException)
             {
-                dataString = null;
+                Debug.Log("READ FAILED");
             }
-
-            if (dataString != null)
-            {
-                callback(dataString);
-                yield return null;
-            } else
-                yield return new WaitForSeconds(0.05f);
 
             nowTime = DateTime.Now;
             diff = nowTime - initialTime;
 
-        } while (diff.Milliseconds < timeout);
+        } while (!read && diff.Milliseconds < timeoutMS);
 
-        if (fail != null)
+        if (!read && fail != null)
             fail();
+
         yield return null;
     }
 
