@@ -21,8 +21,8 @@ Upon successfully adding **Ardunio Controller.cs** script to an empty game objec
 The Arduino Controller script uses a singleton programming pattern, so once it is added to an empty game object on the Unity scene then it can be accessed from any other script using
 > ArduinoController.instance
 
-NOTE: make sure to use the Available() function to ensure that data has been received before attempting to access lastArduinoValues.
+*NOTE: make sure to use the Available() function to ensure that some data has been received before attempting to access lastArduinoValues.*
 
-See **Unity_Arduino_Communicaiton_Example** for and example of the Unity and Arduino code/setup needed for bi-directional communication.
+See **Unity_Arduino_Communicaiton_Example** for an example of the Unity and Arduino code/setup needed for bi-directional communication.
 
 ### Last Tested with Unity 2019.4.15f1
